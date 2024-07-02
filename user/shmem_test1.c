@@ -19,14 +19,21 @@ int main(int argc, char *argv[])
     }
     if (pid != 0)
     {
-        map_shared_pages(getpid(), pid, (uint64)va, 4096);
-        strcpy(va, "Hello child");
+        if (map_shared_pages(getpid(), pid, (uint64)va, sizeof(va)) < 0)
+        {
+            printf("map_shared_pages failed\n");
+            return 1;
+        }
+
+        strcpy(va, "Hello child\0");
+        printf("parent says va contains: %s\n", va);
+
         wait(0);
     }
     else
     {
         sleep(20);
-        printf(va);
+        printf("va contains: %s\n", va);
     }
     return 0;
 }
