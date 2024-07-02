@@ -6,7 +6,15 @@
 #include "defs.h"
 #include "fs.h"
 
-#include "proc.h"
+#ifndef PROC_H
+#define PROC_H
+
+struct proc
+{
+  pagetable_t pagetable; // User page table
+};
+
+#endif
 
 /*
  * the kernel's page table.
