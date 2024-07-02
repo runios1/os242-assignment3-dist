@@ -24,35 +24,6 @@ static uchar crypto_srv_init_code[] = {
     0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00};
 
-uint64 map_shared_pages(struct proc *src_proc, struct proc *dst_proc, uint64 src_va, uint64 size)
-{
-  uint64 src_start = PGROUNDDOWN(src_va);
-  uint64 src_end = PGROUNDUP(src_va + size);
-  uint64 map_size = src_end - src_start;
-
-  // Offset within the first page
-  uint64 offset = src_va - src_start;
-
-  for (uint64 a = src_start; a < src_end; a += PGSIZE)
-  {
-    pte_t *pte = walk(src_proc->pagetable, a, 0);
-    if (pte == 0 || (*pte & PTE_V) == 0 || (*pte & PTE_U) == 0)
-    {
-      printf("walk failed in map_shared_pages\n");
-      return -1;
-    }
-
-    uint64 pa = PTE2PA(*pte);
-
-    if (mappages(dst_proc->pagetable, a + (dst_proc->sz - src_start), PGSIZE, pa, PTE_FLAGS(*pte) | PTE_S) != 0)
-    {
-      return -1;
-    }
-  }
-  dst_proc->sz += map_size;
-  return dst_proc->sz - map_size + offset;
-}
-
 uint64 sys_crypto_op(void)
 {
   // Crypto server process not initialized yet
