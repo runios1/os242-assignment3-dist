@@ -12,7 +12,7 @@ sys_exit(void)
   int n;
   argint(0, &n);
   exit(n);
-  return 0;  // not reached
+  return 0; // not reached
 }
 
 uint64
@@ -43,7 +43,7 @@ sys_sbrk(void)
 
   argint(0, &n);
   addr = myproc()->sz;
-  if(growproc(n) < 0)
+  if (growproc(n) < 0)
     return -1;
   return addr;
 }
@@ -57,8 +57,10 @@ sys_sleep(void)
   argint(0, &n);
   acquire(&tickslock);
   ticks0 = ticks;
-  while(ticks - ticks0 < n){
-    if(killed(myproc())){
+  while (ticks - ticks0 < n)
+  {
+    if (killed(myproc()))
+    {
       release(&tickslock);
       return -1;
     }
@@ -88,4 +90,40 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+uint64 sys_map_shared_pages(void)
+{
+  int src_pid, dst_pid;
+  uint64 src_va, size;
+  struct proc *src_proc, *dst_proc;
+
+  argint(0, &src_pid);
+  argint(1, &dst_pid);
+  argaddr(2, &src_va);
+  argaddr(3, &size);
+
+  src_proc = find_proc(src_pid);
+  dst_proc = find_proc(dst_pid);
+  if (src_proc == 0 || dst_proc == 0)
+    return -1;
+
+  return map_shared_pages(src_proc, dst_proc, src_va, size);
+}
+
+uint64 sys_unmap_shared_pages(void)
+{
+  int pid;
+  uint64 addr, size;
+  struct proc *p;
+
+  argint(0, &pid);
+  argaddr(1, &addr);
+  argaddr(2, &size);
+
+  p = find_proc(pid);
+  if (p == 0)
+    return -1;
+
+  return unmap_shared_pages(p, addr, size);
 }
