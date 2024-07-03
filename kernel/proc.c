@@ -727,12 +727,25 @@ uint64 map_shared_pages(struct proc *src_proc, struct proc *dst_proc, uint64 src
 
     uint64 pa = PTE2PA(*pte);
 
-    if (mappages(dst_proc->pagetable, a + (dst_proc->sz - src_start), PGSIZE, pa, PTE_FLAGS(*pte) | PTE_S) != 0)
+    if (mappages(dst_proc->pagetable, dst_proc->sz, PGSIZE, pa, PTE_FLAGS(*pte) | PTE_S) != 0)
     {
       return -1;
     }
+
+    // Test
+
+    pte_t *dst_pte = walk(dst_proc->pagetable, dst_proc->sz, 0);
+    if (dst_pte == 0 || (*dst_pte & PTE_V) == 0)
+    {
+      printf("Failed to map dst va %p\n", dst_proc->sz);
+      return -1;
+    }
+
+    printf("Mapped dst va %p to pa %p origin pa:%p\n", dst_proc->sz, PTE2PA(*dst_pte), pa);
+
+    // Test
+    dst_proc->sz += PGSIZE;
   }
-  dst_proc->sz += map_size;
   return dst_proc->sz - map_size + offset;
 }
 
