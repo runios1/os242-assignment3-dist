@@ -11,6 +11,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    printf("Parent allocated va: %p\n", va);
+
     int pid = getpid();
 
     int f = fork();
@@ -29,15 +31,13 @@ int main(int argc, char *argv[])
     else
     {
         uint64 p = map_shared_pages(getpid(), pid, (uint64)va, 100);
-        printf("shmem_test1: p = %p\n", p);
         if (p < 0)
         {
             printf("map_shared_pages failed\n");
             return 1;
         }
-        sleep(20);
-
-        p = 0x0000000000014000;
+        printf("Child mapped p: %p\n", (void *)p);
+        // sleep(20);
 
         printf("p contains: %s\n", (char *)p);
     }

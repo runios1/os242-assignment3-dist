@@ -711,11 +711,13 @@ uint64 map_shared_pages(struct proc *src_proc, struct proc *dst_proc, uint64 src
 {
   uint64 src_start = PGROUNDDOWN(src_va);
   uint64 src_end = PGROUNDUP(src_va + size);
-  uint64 map_size = src_end - src_start;
 
   // Offset within the first page
   uint64 offset = src_va - src_start;
 
+  dst_proc->sz = PGROUNDUP(dst_proc->sz);
+
+  uint64 dst_base = dst_proc->sz;
   for (uint64 a = src_start; a < src_end; a += PGSIZE)
   {
     pte_t *pte = walk(src_proc->pagetable, a, 0);
@@ -727,26 +729,25 @@ uint64 map_shared_pages(struct proc *src_proc, struct proc *dst_proc, uint64 src
 
     uint64 pa = PTE2PA(*pte);
 
+    printf("Mapping src va %p is to pa %p\n", a, pa);
+
     if (mappages(dst_proc->pagetable, dst_proc->sz, PGSIZE, pa, PTE_FLAGS(*pte) | PTE_S) != 0)
     {
       return -1;
     }
 
-    // Test
-
     pte_t *dst_pte = walk(dst_proc->pagetable, dst_proc->sz, 0);
-    if (dst_pte == 0 || (*dst_pte & PTE_V) == 0)
+    if (dst_pte == 0 || (*dst_pte & PTE_V) == 0 || (*dst_pte & PTE_S) == 0 || (*dst_pte & PTE_U) == 0)
     {
       printf("Failed to map dst va %p\n", dst_proc->sz);
       return -1;
     }
 
-    printf("Mapped dst va %p to pa %p origin pa:%p\n", dst_proc->sz, PTE2PA(*dst_pte), pa);
+    printf("Mapped dst va %p to pa %p\n", dst_proc->sz, PTE2PA(*dst_pte), pa);
 
-    // Test
     dst_proc->sz += PGSIZE;
   }
-  return dst_proc->sz - map_size + offset;
+  return dst_base + offset;
 }
 
 uint64 unmap_shared_pages(struct proc *p, uint64 addr, uint64 size)
