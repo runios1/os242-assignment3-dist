@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[])
 {
-    char *va = (char *)malloc(100);
+    char *va = (char *)malloc(4096);
     if (va == 0)
     {
         printf("malloc failed\n");
@@ -29,7 +29,12 @@ int main(int argc, char *argv[])
     }
     else
     {
-        uint64 p = map_shared_pages(pid, (uint64)va, 100);
+        printf("Child memory before mapping: %d\n", sbrk(0));
+
+        uint64 p = map_shared_pages(pid, (uint64)va, 4096);
+
+        printf("Child memory after mapping: %d\n", sbrk(0));
+
         if (p < 0)
         {
             printf("map_shared_pages failed\n");
@@ -38,6 +43,14 @@ int main(int argc, char *argv[])
         strcpy((char *)p, "Hello daddy");
 
         unmap_shared_pages(p, 100);
+
+        printf("Child memory after unmapping: %d\n", sbrk(0));
+
+        void *pointer = malloc(100000);
+
+        printf("Child memory after malloc: %d\n", sbrk(0));
+
+        free(pointer);
     }
     return 0;
 }
