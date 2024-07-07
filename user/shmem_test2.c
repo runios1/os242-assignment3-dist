@@ -23,24 +23,21 @@ int main(int argc, char *argv[])
     }
     if (f != 0)
     {
-        sleep(10);
         printf("parent says va contains: %s\n", va);
 
         wait(0);
     }
     else
     {
-        uint64 p = map_shared_pages(pid, getpid(), (uint64)va, 100);
+        uint64 p = map_shared_pages(pid, (uint64)va, 100);
         if (p < 0)
         {
             printf("map_shared_pages failed\n");
             return 1;
         }
-        strcpy((char *)p, "Hello daddy\0");
+        strcpy((char *)p, "Hello daddy");
 
-        sleep(20);
-
-        unmap_shared_pages(getpid(), p, 100);
+        unmap_shared_pages(p, 100);
     }
     return 0;
 }

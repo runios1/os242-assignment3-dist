@@ -745,6 +745,7 @@ uint64 map_shared_pages(struct proc *src_proc, struct proc *dst_proc, uint64 src
 
     dst_proc->sz += PGSIZE;
   }
+  release(&src_proc->lock); // Release the lock acquired in find_proc
   return dst_base + offset;
 }
 
@@ -778,8 +779,7 @@ struct proc *find_proc(int pid)
     acquire(&proc[i].lock);
     if (proc[i].pid == pid)
     {
-      release(&proc[i].lock);
-      return &proc[i];
+      return &proc[i]; // Does not release lock when proc is found - calling function releases lock
     }
     release(&proc[i].lock);
   }

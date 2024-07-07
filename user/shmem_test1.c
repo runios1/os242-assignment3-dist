@@ -23,14 +23,14 @@ int main(int argc, char *argv[])
     {
 
         // printf("Parent allocated va: %p\n", va);
-        strcpy(va, "Hello child\0");
+        strcpy(va, "Hello child");
         // printf("parent says va contains: %s\n", va);
 
         wait(0);
     }
     else
     {
-        uint64 p = map_shared_pages(pid, getpid(), (uint64)va, 4096);
+        uint64 p = map_shared_pages(pid, (uint64)va, 4096);
         if (p == 0xFFFFFFFFFFFFFFFF)
         {
             printf("map_shared_pages failed\n");
