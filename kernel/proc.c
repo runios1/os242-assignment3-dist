@@ -715,8 +715,6 @@ uint64 map_shared_pages(struct proc *src_proc, struct proc *dst_proc, uint64 src
   // Offset within the first page
   uint64 offset = src_va - src_start;
 
-  dst_proc->sz = PGROUNDUP(dst_proc->sz);
-
   uint64 dst_base = dst_proc->sz;
   for (uint64 a = src_start; a < src_end; a += PGSIZE)
   {
@@ -777,8 +775,13 @@ struct proc *find_proc(int pid)
 {
   for (int i = 0; i < NPROC; i++)
   {
+    acquire(&proc[i].lock);
     if (proc[i].pid == pid)
+    {
+      release(&proc[i].lock);
       return &proc[i];
+    }
+    release(&proc[i].lock);
   }
   return 0;
 }
