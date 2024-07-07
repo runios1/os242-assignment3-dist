@@ -4,16 +4,14 @@
 
 int main(int argc, char *argv[])
 {
-    char *va = (char *)malloc(100);
+    int pid = getpid();
+
+    char *va = (char *)malloc(4096);
     if (va == 0)
     {
         printf("malloc failed\n");
         return 1;
     }
-
-    printf("Parent allocated va: %p\n", va);
-
-    int pid = getpid();
 
     int f = fork();
     if (f == -1)
@@ -23,6 +21,8 @@ int main(int argc, char *argv[])
     }
     if (f != 0)
     {
+
+        // printf("Parent allocated va: %p\n", va);
         strcpy(va, "Hello child\0");
         // printf("parent says va contains: %s\n", va);
 
@@ -30,8 +30,8 @@ int main(int argc, char *argv[])
     }
     else
     {
-        uint64 p = map_shared_pages(getpid(), pid, (uint64)va, 100);
-        if (p < 0)
+        uint64 p = map_shared_pages(pid, getpid(), (uint64)va, 4096);
+        if (p == 0xFFFFFFFFFFFFFFFF)
         {
             printf("map_shared_pages failed\n");
             return 1;
