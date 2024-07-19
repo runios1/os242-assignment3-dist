@@ -129,6 +129,7 @@ static uint64 (*syscalls[])(void) = {
     [SYS_close] sys_close,
     [SYS_crypto_op] sys_crypto_op,
     [SYS_take_shared_memory_request] sys_take_shared_memory_request,
+    [SYS_remove_shared_memory_request] sys_remove_shared_memory_request,
     [SYS_map_shared_pages] sys_map_shared_pages,
     [SYS_unmap_shared_pages] sys_unmap_shared_pages,
 

@@ -103,8 +103,9 @@ uint64 sys_map_shared_pages(void)
   argaddr(2, &size);
 
   src_proc = find_proc(src_pid);
-  if (src_proc == 0)
+  if (src_proc == 0){
     return -1;
+  }
 
   return map_shared_pages(src_proc, myproc(), src_va, size);
 }

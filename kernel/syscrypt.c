@@ -61,14 +61,14 @@ uint64 sys_take_shared_memory_request(void)
   {
     return -1;
   }
-
+  
   const uint64 dst_va = map_shared_pages(src_proc, p, req.src_va, req.size);
   if (dst_va == 0)
   {
     release(&src_proc->lock);
     return -1;
   }
-
+  acquire(&src_proc->lock);
   uint64 arg_dst_va;
   uint64 arg_dst_size;
   argaddr(0, &arg_dst_va);
